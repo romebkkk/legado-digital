@@ -1,0 +1,30 @@
+<!doctype html>
+<html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>Legado Digital · ¿Qué pasará con tus cuentas cuando faltes?</title>
+<meta name="description" content="Crea gratis tu plan de herencia digital: qué hacer con cada cuenta (cerrar, conservar, cuenta conmemorativa), quién se encarga y dónde está la información. Sin contraseñas, todo en tu navegador.">
+<link rel="stylesheet" href="style.css"><style>:root{--accent:#c084fc}</style></head><body><div class="wrap">
+<header><div class="logo">🕊️ Legado <b>Digital</b></div><p>Un documento sencillo para que tu familia no se quede bloqueada con tus cuentas, fotos y suscripciones.</p>
+<span class="tag">Privado · nada se sube · sin contraseñas</span></header>
+<div class="note">🔒 <b>Nunca escribas contraseñas aquí.</b> Indica solo DÓNDE están (p. ej. "en mi gestor de contraseñas, mi hija sabe dónde está la clave maestra"). La herramienta te avisa si detecta algo que parece una contraseña.</div>
+<div class="card noprint"><div class="g2"><div><label>Tu nombre</label><input id="tit"></div><div><label>Persona de confianza (albacea digital)</label><input id="alb"></div><div><label>Su contacto</label><input id="albc"></div><div><label>Fecha</label><input id="fe" type="date"></div></div>
+ <h3>Cuentas</h3><div id="cs"></div><button class="btn sec" id="add">+ Añadir cuenta</button>
+ <label>Dispositivos (móvil, portátil…) y cómo acceder sin revelar claves</label><textarea id="dis" placeholder="El código del móvil está en el sobre del cajón del escritorio"></textarea>
+ <label>¿Dónde está la información importante?</label><textarea id="don" placeholder="Gestor de contraseñas Bitwarden; documentos en la carpeta 'Importante' de Drive"></textarea>
+ <label>Mensaje para tus seres queridos (opcional)</label><textarea id="msg"></textarea>
+ <button class="btn" id="gen">Generar mi plan</button><div id="av"></div></div>
+<div class="paper" id="doc" style="display:none"></div><button class="btn sec noprint" id="pr" style="display:none">🖨️ Imprimir / guardar PDF</button>
+<footer>Código abierto · <a href="https://github.com/romebkkk/legado-digital" target="_blank">GitHub</a> · Hecho con ❤️ por <a href="https://dataflowelegance.es" target="_blank">DataFlow Elegance</a></footer></div>
+<script src="legado.js"></script><script>
+var $=function(s){return document.querySelector(s)},L=LegadoDigital;$("#fe").value=new Date(Date.now()-new Date().getTimezoneOffset()*60000).toISOString().slice(0,10);
+function esc(s){return String(s||"").replace(/[&<>]/g,function(c){return{"&":"&amp;","<":"&lt;",">":"&gt;"}[c]})}
+function cuenta(s){var r=document.createElement("div");r.className="row";r.innerHTML='<input placeholder="Servicio (Gmail, Instagram, banco…)" value="'+(s||"")+'"><input placeholder="Usuario / email (no la contraseña)"><select style="flex:1">'+Object.keys(L.ACCIONES).map(function(k){return'<option value="'+k+'">'+L.ACCIONES[k]+'</option>'}).join("")+'</select><input placeholder="Notas"><button class="x">✕</button>';r.querySelector(".x").onclick=function(){r.remove()};$("#cs").appendChild(r)}
+["Gmail / Google","WhatsApp","Instagram","Banco"].forEach(cuenta);$("#add").onclick=function(){cuenta("")};
+$("#gen").onclick=function(){
+ var cs=[].map.call($("#cs").children,function(r){var i=r.querySelectorAll("input"),s=r.querySelector("select");return{servicio:i[0].value,usuario:i[1].value,accion:s.value,notas:i[2].value}});
+ var d=L.generar({titular:$("#tit").value,fecha:$("#fe").value,albacea:{nombre:$("#alb").value,contacto:$("#albc").value},cuentas:cs,dispositivos:$("#dis").value,donde:$("#don").value,mensaje:$("#msg").value});
+ $("#av").innerHTML=d.avisos.map(function(a){return'<p class="bad">⚠️ '+esc(a)+'</p>'}).join("");
+ if(!d.seguro){$("#doc").style.display="none";$("#pr").style.display="none";return}
+ $("#doc").innerHTML='<h2 style="margin-top:0">Plan de legado digital de '+esc(d.titular)+'</h2><p>Fecha: '+esc(d.fecha)+' · Persona encargada: <b>'+esc(d.albacea.nombre)+'</b> ('+esc(d.albacea.contacto)+')</p><table><tr><th>Servicio</th><th>Usuario</th><th>Qué hacer</th><th>Notas</th></tr>'+d.cuentas.map(function(c){return'<tr><td>'+esc(c.servicio)+'</td><td>'+esc(c.usuario)+'</td><td>'+esc(c.accion)+'</td><td>'+esc(c.notas)+'</td></tr>'}).join("")+'</table><h3>Dispositivos</h3><p>'+esc(d.dispositivos)+'</p><h3>Dónde está la información</h3><p>'+esc(d.donde)+'</p>'+(d.mensaje?'<h3>Mensaje</h3><p>'+esc(d.mensaje)+'</p>':'')+'<p style="color:#666;font-size:.85rem">Guarda este documento en un lugar seguro y díselo a tu persona de confianza. Muchos servicios (Google, Facebook, Apple) permiten designar contactos de legado en sus ajustes.</p>';
+ $("#doc").style.display="block";$("#pr").style.display="";$("#doc").scrollIntoView({behavior:"smooth"})};
+$("#pr").onclick=function(){window.print()};
+</script></body></html>
